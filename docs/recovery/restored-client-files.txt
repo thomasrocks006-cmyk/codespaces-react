@@ -1,7 +1,4 @@
-client/package.json
-client/src/components/MapWidget.tsx
 client/src/components/TransactionSheet.tsx
-client/src/constants/locations.ts
 client/src/hooks/useApiTransactions.ts
 client/src/index.css
 client/src/pages/Transactions.tsx
