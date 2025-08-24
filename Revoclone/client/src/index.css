@@ -4,9 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet map default styles */
-@import url('leaflet/dist/leaflet.css');
-
 :root {
   --background: hsl(0, 0%, 4%);
   --foreground: hsl(0, 0%, 100%);

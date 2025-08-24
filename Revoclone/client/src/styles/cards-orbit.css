@@ -1,0 +1,71 @@
+/* Animated orbit ring for card with class .card-orbit
+   Uses a pseudo-element with a conic gradient that spins.
+   We mask the center so only a ring shows. Performance-friendly,
+   falls back gracefully for reduced motion. */
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-orbit {
+  position: relative;
+  isolation: isolate; /* So pseudo sits above gradient but below inner content if needed */
+}
+
+.card-orbit::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px; /* Smaller ring for mobile cards */
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    #ffb347,
+    #ffd36b,
+    #ff8a00,
+    #ffb347
+  );
+  /* Create hollow center (ring) via mask */
+  -webkit-mask: radial-gradient(circle at 50% 50%, transparent 60%, black 62%);
+  mask: radial-gradient(circle at 50% 50%, transparent 60%, black 62%);
+  filter: blur(0.3px); /* Reduced blur for smaller cards */
+  animation: orbit-spin 6s linear infinite;
+  z-index: -1; /* Behind the card */
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.card-orbit::after {
+  /* Soft glow just outside card edges */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: 
+    radial-gradient(circle at 30% 25%, rgba(255,138,0,0.2), transparent 65%),
+    radial-gradient(circle at 70% 75%, rgba(255,200,80,0.15), transparent 70%);
+  z-index: -1; /* Behind the card */
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Ensure the card content stays above the orbit ring */
+.card-orbit > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-orbit::before {
+    animation: none;
+  }
+}
+
+/* Mobile-optimized card dimensions */
+.h-14 {
+  height: 56px;
+}
+
+.w-20 {
+  width: 80px;
+}

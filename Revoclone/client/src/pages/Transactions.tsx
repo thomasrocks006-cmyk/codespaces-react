@@ -11,22 +11,6 @@ import SearchBar from "@/components/SearchBar";
 import TransactionSheet from "@/components/TransactionSheet";
 import { TransactionSkeleton, ErrorMessage, EmptyState } from "@/components/LoadingStates";
 
-// Convert a numeric amount from a given currency to AUD using static rates
-const convertToAud = (amount: number, fromCurrency: string): number | null => {
-  switch (fromCurrency) {
-    case 'AUD':
-      return amount;
-    case 'EUR':
-      // 1 AUD = 0.55 EUR -> 1 EUR = 1/0.55 AUD
-      return amount / 0.55;
-    case 'GBP':
-      // 1 AUD = 0.48 GBP -> 1 GBP = 1/0.48 AUD
-      return amount / 0.48;
-    default:
-      return null; // Unknown conversion
-  }
-};
-
 export default function Transactions() {
   const [openTx, setOpenTx] = useState<Transaction | null>(null);
   const { transactions, loading, error } = useApiTransactions();
@@ -37,15 +21,9 @@ export default function Transactions() {
 
   const formatAmount = (amount: string, currency: string = 'AUD') => {
     const value = parseFloat(amount);
-    const symbol =
-      currency === "AUD" ? "$" :
-      currency === "EUR" ? "€" :
-      currency === "USD" ? "$" :
-      currency === "GBP" ? "£" : "";
-    return `${value >= 0 ? "+" : "-"}${symbol}${Math.abs(value).toFixed(2)}`;
+    const symbol = currency === "AUD" ? "$" : currency === "EUR" ? "€" : currency === "USD" ? "$" : "";
+    return `${value >= 0 ? "+" : ""}${symbol}${Math.abs(value).toFixed(2)}`;
   };
-
-  
 
   if (loading) return <TransactionSkeleton />;
   if (error) return <ErrorMessage error={error} onRetry={() => window.location.reload()} />;
@@ -123,24 +101,12 @@ const TransactionRow = React.memo(({
   onClick: () => void; 
   formatAmount: (amount: string, currency?: string) => string; 
 }) => {
-  // Choose primary as the original (local) currency/amount when available
-  const primaryCurrency = transaction.originalCurrency || transaction.currency || 'AUD';
-  const primaryAmountStr = transaction.originalAmount || transaction.amount;
-  const amount = parseFloat(primaryAmountStr);
+  const amount = parseFloat(transaction.amount);
   const isReverted = transaction.status === "reverted";
   const isCV = transaction.status === "card_verification";
 
   const primaryColor = isReverted ? "rgba(255,255,255,.7)" : amount > 0 ? "#22C55E" : amount < 0 ? "#FFFFFF" : "#FFFFFF";
-  const primaryText = formatAmount(primaryAmountStr, primaryCurrency);
-
-  // Secondary should always be AUD when primary is non-AUD (for supported currencies)
-  let secondaryText: string | null = null;
-  if (primaryCurrency !== 'AUD') {
-    const audValue = convertToAud(amount, primaryCurrency);
-    if (audValue !== null) {
-      secondaryText = formatAmount(audValue.toString(), 'AUD');
-    }
-  }
+  const primaryText = formatAmount(transaction.amount, transaction.currency);
 
   const timeText = new Date(transaction.date).toLocaleTimeString("en-GB", { 
     hour: "2-digit", 
@@ -172,6 +138,9 @@ const TransactionRow = React.memo(({
         </div>
         <div className="text-[13px] text-gray-500">
           {subs.join(" · ")}
+          {transaction.description && (
+            <div className="text-[13px] text-gray-500">{transaction.description}</div>
+          )}
         </div>
       </div>
 
@@ -188,8 +157,8 @@ const TransactionRow = React.memo(({
             {primaryText}
           </div>
         )}
-        {secondaryText && (
-          <div className="text-[12px] text-gray-500">{secondaryText}</div>
+        {transaction.secondary && (
+          <div className="text-[12px] text-gray-500">{transaction.secondary}</div>
         )}
       </div>
     </div>

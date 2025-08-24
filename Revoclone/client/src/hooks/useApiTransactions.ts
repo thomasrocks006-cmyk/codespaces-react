@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { User, Transaction as ServerTransaction } from '@shared/schema';
 import type { Transaction as ClientTransaction } from '@/types/transaction';
-import { MERCHANT_LOCATIONS } from '@/constants/locations';
 
 /**
  * Maps server transaction status with description-based overrides for UI badges
@@ -42,7 +41,7 @@ function mapServerToClientTransaction(serverTx: ServerTransaction): ClientTransa
     originalAmount: serverTx.originalAmount ?? undefined,
     originalCurrency: serverTx.originalCurrency ?? undefined,
     iconColor: serverTx.iconColor ?? undefined,
-  location: MERCHANT_LOCATIONS[serverTx.merchant] || undefined,
+    // location: undefined - server doesn't provide geo data, UI handles optional
   };
 }
 
