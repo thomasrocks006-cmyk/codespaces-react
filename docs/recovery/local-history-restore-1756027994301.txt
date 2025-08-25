@@ -1,0 +1,1 @@
+dest	snapshot	timestamp	entries_json
